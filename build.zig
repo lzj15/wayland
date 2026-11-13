@@ -418,6 +418,7 @@ fn createWaylandScanner(
 ) *std.Build.Step.Compile {
     const wayland_scanner = b.addExecutable(.{
         .name = "wayland-scanner",
+        .linkage = if (target.result.abi == .musl) .static else null,
         .root_module = b.createModule(.{
             .target = target,
             .optimize = optimize,
