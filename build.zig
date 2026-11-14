@@ -36,8 +36,8 @@ pub fn build(b: *std.Build) void {
         .WAYLAND_VERSION = b.fmt("{f}", .{version}),
     });
 
-    const wayland_util = createWaylandUtil(b, target, optimize, upstream, cc_flags);
-    const wayland_util_host = createWaylandUtil(b, b.graph.host, optimize, upstream, cc_flags);
+    const wayland_util = createWaylandUtil(b, target, optimize, pic, upstream, cc_flags);
+    const wayland_util_host = createWaylandUtil(b, b.graph.host, optimize, pic, upstream, cc_flags);
 
     const wayland_scanner_args: CreateWaylandScannerArgs = .{
         .dtd_validation = dtd_validation,
@@ -119,6 +119,7 @@ pub fn build(b: *std.Build) void {
                 .target = target,
                 .optimize = optimize,
                 .link_libc = true,
+                .pic = pic,
             }),
         });
         wayland_private.root_module.addIncludePath(wayland_header2.dirname());
@@ -143,6 +144,7 @@ pub fn build(b: *std.Build) void {
         } else if (b.lazyDependency("libffi", .{
             .target = target,
             .optimize = optimize,
+            .pic = pic,
         })) |libffi| {
             wayland_private.root_module.linkLibrary(libffi.artifact("ffi"));
         }
@@ -245,6 +247,7 @@ pub fn build(b: *std.Build) void {
         } else if (b.lazyDependency("libffi", .{
             .target = target,
             .optimize = optimize,
+            .pic = pic,
         })) |libffi| {
             wayland_server.root_module.linkLibrary(libffi.artifact("ffi"));
         }
@@ -300,6 +303,7 @@ pub fn build(b: *std.Build) void {
         } else if (b.lazyDependency("libffi", .{
             .target = target,
             .optimize = optimize,
+            .pic = pic,
         })) |libffi| {
             wayland_client.root_module.linkLibrary(libffi.artifact("ffi"));
         }
@@ -377,6 +381,7 @@ fn createWaylandUtil(
     b: *std.Build,
     target: std.Build.ResolvedTarget,
     optimize: std.builtin.OptimizeMode,
+    pic: ?bool,
     wayland: *std.Build.Dependency,
     cc_flags: []const []const u8,
 ) *std.Build.Step.Compile {
@@ -387,6 +392,7 @@ fn createWaylandUtil(
             .target = target,
             .optimize = optimize,
             .link_libc = true,
+            .pic = pic,
         }),
     });
     wayland_util.installHeader(wayland.path("src/wayland-util.h"), "wayland-util.h");
